@@ -1,7 +1,4 @@
 from crewai import Agent
-from crewai_tools.tools.serper_dev_tool.serper_dev_tool import SerperDevTool
-
-search_tool = SerperDevTool()
 
 
 def agents(llm_8b, llm_70b):
@@ -72,7 +69,6 @@ def agents(llm_8b, llm_70b):
                   'architecture based on its ability to meet user needs effectively.',
         verbose=True,
         llm=llm_70b,
-        tools=[search_tool],
         max_iters=1
     )
 

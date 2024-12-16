@@ -22,9 +22,8 @@ async def functionality_tests(url):
 
         unclickable_buttons = []
         for button in buttons:
-            if not button.is_displayed() or not button.is_enabled():
+            if button.get_attribute("disabled") or button.value_of_css_property("display") == "none":
                 button_id = button.get_attribute("id") or button.get_attribute("name") or button.get_attribute("class") or "Unnamed Button"
-
                 unclickable_buttons.append(f"Button: {button_id}")
 
         form_issues = []
@@ -47,7 +46,7 @@ async def functionality_tests(url):
         form_issues_ratio = 1 - (len(form_issues) / max(len(forms), 1))
 
         response = {
-            "global_score": unclickable_buttons_ratio * 0.3 + form_issues_ratio * 0.7,
+            "global_score": round(unclickable_buttons_ratio * 0.3 + form_issues_ratio * 0.7, 2),
             "unclickable_buttons": unclickable_buttons,
             "form_issues": form_issues
         }

@@ -1,6 +1,8 @@
 import asyncio
 
 from crewai import Task
+from crewai_tools.tools.website_search.website_search_tool import WebsiteSearchTool
+
 from agents import agents
 from utils.functional_tests import functionality_tests
 from utils.accessibility_tests import accessibility_test
@@ -93,14 +95,14 @@ async def tasks(llm_8b, llm_70b, url):
             "The expected output is a JSON object summarizing the analysis of grammar, structure, and feedback."
         ),
         output_json=TextEvaluation,
-        agent=text_content_evaluator
+        agent=text_content_evaluator,
     )
 
     information_architecture_task = Task(
         name='InformationArchitectureEvaluation',
         description=(
-            f'Input: {url}'
-            f'Analyze the provided website data using the WebsiteSearchTool and evaluate its information architecture. '
+            f'Input: {text_content}'
+            f'Analyze the provided website content and evaluate its information architecture. '
             f'1. Determine the type of website (e.g., company site, e-commerce, blog). '
             f'2. Evaluate how easy it is to locate the following key elements: contact information, login form, navigation menus, and relevant content sections. '
             f'3. Provide feedback on usability and information organization, highlighting strengths and weaknesses. '
@@ -113,8 +115,8 @@ async def tasks(llm_8b, llm_70b, url):
             f'(c) A detailed breakdown of element accessibility with suggestions for improvement.'
         ),
         output_json=InformationArchitectureEvaluation,
-        agent=information_architecture_agent
+        agent=information_architecture_agent,
     )
 
-    return [html_bugs_feedback, functional_testing_task, html_accessibility_task, text_content_analysis_task]
+    return [html_bugs_feedback, functional_testing_task, html_accessibility_task, information_architecture_task]
 

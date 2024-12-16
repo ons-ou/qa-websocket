@@ -57,8 +57,6 @@ class ElementEvaluation(BaseModel):
     element: str = Field(...,
                          description="The name of the element being evaluated, e.g., 'Contact Info', 'Login Form', 'Navigation Menu'.")
     found: bool = Field(..., description="Indicates whether the element was found on the website.")
-    time_to_locate: Optional[int] = Field(None,
-                                          description="Time in seconds it took to locate the element, or None if not found.")
     usability: Optional[str] = Field(None,
                                      description="A description of the usability of the element, e.g., 'intuitive', 'difficult', or None if not applicable.")
 

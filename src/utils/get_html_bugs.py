@@ -72,7 +72,7 @@ async def count_html_bugs(html):
     repeated_css_ratio, repeated_css_details = find_repeated_css_styles(html)
 
     response = {
-        "global_score": unclosed_tags_ratio * 0.7 + repeated_css_ratio * 0.3,
+        "global_score": round(unclosed_tags_ratio * 0.7 + repeated_css_ratio * 0.3,2),
         "unclosed_tags": unclosed_tags_details,
         "repeated_css": repeated_css_details
     }
