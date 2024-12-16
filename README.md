@@ -32,7 +32,7 @@ echo "GROC_API_KEY=<your_api_key>" > .env
 `````bash
 pip install -r requirements.txt
 `````
-### Step 2: Add GROC_API_KEY to the .env File
+### Step 4: Run App
 `````bash
 uvicorn app.main:app --reload
 `````
