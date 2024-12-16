@@ -64,7 +64,7 @@ def find_repeated_css_styles(html):
     return 1 - ratio, repeated_css_details
 
 
-def count_html_bugs(html):
+async def count_html_bugs(html):
     unclosed_parser = UnclosedTagParser()
     unclosed_parser.feed(html)
     unclosed_tags_ratio, unclosed_tags_details = unclosed_parser.get_unclosed_tags()

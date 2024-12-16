@@ -3,7 +3,7 @@ from axe_selenium_python import Axe
 from selenium.webdriver.chrome.options import Options
 
 
-def accessibility_test(url):
+async def accessibility_test(url):
     options = Options()
     options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
@@ -35,5 +35,3 @@ def accessibility_test(url):
         driver.quit()
 
 
-if __name__ == '__main__':
-    print(accessibility_test("https://www.facebook.com/"))

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-from starlette.websockets import WebSocketDisconnect, WebSocket
+from starlette.websockets import WebSocket
 
 import json
 import os
@@ -9,19 +9,17 @@ from dotenv import load_dotenv, find_dotenv
 from langchain_groq import ChatGroq
 
 from agents import agents
-from utils.get_json import extract_json
 from tasks import tasks
 
 load_dotenv(find_dotenv())
 
 os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
 
-llm_8b = ChatGroq(model="llama3-8b-8192", temperature=0)
-llm_70b = ChatGroq(model="llama3-70b-8192", temperature=0)
+llm_8b = ChatGroq(model="groq/llama3-8b-8192", temperature=0)
+llm_70b = ChatGroq(model="groq/llama3-70b-8192", temperature=0)
 
 
 app = FastAPI()
-TASK_RESULTS = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,16 +30,10 @@ app.add_middleware(
 )
 
 
-async def process_and_send_tasks(url: str):
-    """
-    Process tasks for the given URL and send their results via WebSocket.
-
-    Args:
-        url (str): The URL to evaluate.
-    """
+async def get_feedback(url: str):
 
     llm_agents = agents(llm_8b, llm_70b)
-    llm_tasks = tasks(llm_8b, llm_70b, url)
+    llm_tasks = await tasks(llm_8b, llm_70b, url)
 
     crew = Crew(
         agents=llm_agents,
@@ -49,15 +41,14 @@ async def process_and_send_tasks(url: str):
         verbose=1,
     )
 
-    crew.kickoff()
+    await crew.kickoff_async()
+
     message = {}
     for i, task in enumerate(llm_tasks):
-        task_output = task.output.result
+        task_output = task.output.json_dict
         task_name = task.name
         print("TASK OUTPUT: ", task_output)
-        response = extract_json(task_output)
-        print("TASK_OUTPUT_PARSED: ", response)
-        message[task_name] = json.loads(response)
+        message[task_name] = task_output
 
     print("OUTPUT: \n")
     print(message)
@@ -71,6 +62,6 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         json_data = await websocket.receive_json()
         print(json_data)
-        response = await process_and_send_tasks(json_data.get("url"))
+        response = await get_feedback(json_data.get("url"))
         await websocket.send_json(response)
 

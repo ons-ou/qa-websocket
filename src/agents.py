@@ -1,4 +1,7 @@
 from crewai import Agent
+from crewai_tools.tools.serper_dev_tool.serper_dev_tool import SerperDevTool
+
+search_tool = SerperDevTool()
 
 
 def agents(llm_8b, llm_70b):
@@ -14,6 +17,21 @@ def agents(llm_8b, llm_70b):
         max_iters=1
     )
 
+    functional_testing_agent = Agent(
+        role='Form and Button Feedback Generator',
+        goal='Analyze provided issues related to unclickable buttons and problematic forms on a webpage. Based on the input, '
+             'generate a global score, detailed feedback, and suggestions for improvement.',
+        backstory='You are a QA specialist focusing on forms and buttons in web functionality testing. You will receive a '
+                  'preprocessed list of unclickable buttons and form-related issues as input, along with a global score. '
+                  'If the global score is 1, confirm everything is working perfectly and return only positive feedback. '
+                  'If the score is below 1, analyze the provided issues, classify them by severity, and offer constructive '
+                  'feedback. Return a JSON containing the global score, feedback, and a structured list of issues, each '
+                  'with a description, severity level, and recommendations.',
+        verbose=False,
+        llm=llm_8b,
+        max_iters=1
+    )
+
     html_accessibility_tester = Agent(
         role='Accessibility Advisor',
         goal='Evaluate web accessibility by analyzing violations and generating an Accessibility Score. Provide '
@@ -22,7 +40,7 @@ def agents(llm_8b, llm_70b):
                   'severity (Critical=10, Moderate=5, Minor=2), and offer recommendations. Return a JSON with the '
                   'score, feedback, and identified issues.',
         verbose=False,
-        llm=llm_70b,
+        llm=llm_8b,
         max_iters=1
     )
 
@@ -31,38 +49,31 @@ def agents(llm_8b, llm_70b):
         goal='Analyze webpage text for language, grammar, spelling, and structure. Provide feedback to improve '
              'readability and professionalism.',
         backstory='You are a textual analysis expert helping refine web content. Focus on language detection, '
-                  'grammar issues, structural coherence, and audience engagement. Return a JSON with the detected '
-                  'language, grammar and spelling issues, text structure evaluation, and actionable feedback.',
-        verbose=False,
+                  'grammar issues, structural coherence, and audience engagement. '
+                  'If the overall structure is good return a number closer to 1, else one closer to 0.'
+                  'Return a JSON with a score'
+                  'of the overall webpage content on a scale of 0-1, grammar and spelling issues, text structure evaluation, and actionable feedback.',
+        verbose=True,
         llm=llm_70b,
-        allow_code_execution=True,
         max_iters=1
     )
 
-    information_architecture_evaluator = Agent(
+    information_architecture_agent = Agent(
         role='Information Architecture Evaluator',
-        goal='Analyze the provided webpage content to evaluate its information architecture, with a focus on text '
-             'elements such as contact information. Identify the type of website (e.g., corporate, e-commerce, blog, '
-             'etc.), and assess the presence and quality of key content elements for the identified website type. For '
-             'example, on a corporate page, check for the availability and clarity of contact information, '
-             'as well as the effectiveness of other essential elements like navigation menus, headers, and footers. '
-             'Provide actionable feedback on missing or inadequately implemented elements to improve the website’s '
-             'usability and user experience.',
-        backstory=(
-            'As an expert in information architecture and web usability, this agent specializes in evaluating the '
-            'structure and content of websites. It is skilled in identifying the type of website based on content and '
-            'structure, and assessing whether essential elements—such as navigation, contact information, '
-            'and layout—are properly included and executed. The goal is to ensure that websites are user-friendly, '
-            'with clear and accessible content that aligns with the website’s purpose. This includes ensuring that '
-            'key information, like contact details on corporate pages, is easy to find and use. Your task is to '
-            'return a JSON output containing the identified website type, an evaluation of its information '
-            'architecture, and feedback for improving key elements like contact information and overall usability.'
-            'Only returns the final result. Do not provide a summary!!'
-        ),
-        verbose=False,
+        goal='Evaluate the information architecture of a website by identifying its type and assessing how easy it is '
+             'to locate key elements such as contact information, login forms, and other relevant content. Take into '
+             'account that not all elements are available on all website types (e.g., company sites may lack login '
+             'forms).',
+        backstory='You are a web usability expert specializing in analyzing website information architecture. Your '
+                  'task is to classify the type of website (e.g., company site, e-commerce, blog, etc.) based on the '
+                  'provided data and evaluate how intuitive and efficient the information architecture is for '
+                  'locating important elements. '
+                  'Provide feedback on usability, identify missing elements where applicable, and score the '
+                  'architecture based on its ability to meet user needs effectively.',
+        verbose=True,
         llm=llm_70b,
-        allow_code_execution=True,
+        tools=[search_tool],
         max_iters=1
     )
 
-    return [html_bug_checker, html_accessibility_tester, text_content_evaluator, information_architecture_evaluator]
+    return [html_bug_checker, functional_testing_agent, html_accessibility_tester, text_content_evaluator, information_architecture_agent]

@@ -7,7 +7,7 @@ This is a FastAPI application that processes feedback from a webpage via a WebSo
 ## Prerequisites
 
 Ensure you have the following installed:
-- Python 3.8 or later
+- Python >=3.10 and <=3.12
 - `pip` (Python package manager)
 - A valid `GROC_API_KEY`
 

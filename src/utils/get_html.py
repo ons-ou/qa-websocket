@@ -7,7 +7,7 @@ def get_html(url):
     return response.text
 
 
-def html_to_text(html):
+async def html_to_text(html):
     h = HTML2Text()
     h.ignore_links = True
     h.ignore_images = True
